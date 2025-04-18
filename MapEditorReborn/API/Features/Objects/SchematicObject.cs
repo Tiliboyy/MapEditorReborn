@@ -26,6 +26,9 @@ namespace MapEditorReborn.API.Features.Objects
     using Extensions;
     using InventorySystem.Items.Firearms.Attachments;
     using Mirror;
+
+    using PluginAPI.Core.Items;
+
     using Serializable;
     using UnityEngine;
     using Utf8Json;
@@ -383,12 +386,12 @@ namespace MapEditorReborn.API.Features.Objects
                     }
                     else
                     {
-                        Item item = Item.Create((ItemType)Enum.Parse(typeof(ItemType), block.Properties["ItemType"].ToString()));
-
-                        if (item is Firearm firearm && block.Properties.TryGetValue("Attachements", out property))
-                            firearm.AddAttachment(property as List<AttachmentName>);
-
-                        pickup = item.CreatePickup(Vector3.zero);
+                        var itemPickup = ItemPickup.Create((ItemType)Enum.Parse(typeof(ItemType), block.Properties["ItemType"].ToString()), Vector3.zero, Quaternion.Euler(block.Rotation));
+                        pickup = Pickup.Get(itemPickup.Serial);
+                        if (pickup is FirearmPickup firearm)
+                        {
+                            firearm.Ammo = firearm.MaxAmmo;
+                        }
                     }
 
                     gameObject = pickup.Base.gameObject;
